@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'package:dam_u3_practica1_bd/Materia.dart';
 import 'package:dam_u3_practica1_bd/Tarea.dart';
 import 'package:dam_u3_practica1_bd/basedatos.dart';
@@ -20,6 +19,7 @@ class _AppState extends State<App> {
   Tarea estTarea = Tarea(idTarea: 0, idMateria: "", f_entrega: "", descripcion: "");
   bool mostrar = false;
   bool comprobar = false;
+  bool light = false;
 
   int index = 0;
   // Contoller para Materia
@@ -73,7 +73,6 @@ class _AppState extends State<App> {
           });
         },
         items: [
-
           BottomNavigationBarItem(icon: Badge(child: Icon(Icons.home), label: Text("${t.length}",), isLabelVisible: index!=0), label: "Lista de Tareas"), // TAREAS
           BottomNavigationBarItem(icon: Badge(child: Icon(Icons.feed_outlined), label: Text("${m.length}"), isLabelVisible: index!=1), label:  "Lista de Materias"), // MATERIAS
           BottomNavigationBarItem(icon: Icon(Icons.add_card), label: "Agregar Materia"), // MATERIAS
@@ -81,7 +80,15 @@ class _AppState extends State<App> {
       ),
       floatingActionButton: Visibility(
         visible: mostrar,
-          child: FloatingActionButton(onPressed: (){agregarTarea();}, child: Icon(Icons.add))
+          child: FloatingActionButton(
+              onPressed: (){
+                if(m.length > 0){
+                  agregarTarea();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("No hay Materias para asignar Tarea"),));
+                }
+              },
+              child: Icon(Icons.add))
       ),
     );
   }
@@ -460,7 +467,7 @@ class _AppState extends State<App> {
           return ListTile(
             title: Text(t[indice].descripcion),
             subtitle: Text(t[indice].f_entrega),
-            leading: CircleAvatar(child: Text(t[indice].idMateria), radius: 15,),
+            leading: CircleAvatar(child: Text(t[indice].idMateria), radius: 20,),
             trailing: IconButton(
               onPressed: (){
                 showDialog(
@@ -622,7 +629,7 @@ class _AppState extends State<App> {
           return ListTile(
             title: Text(m[indice].nombre),
             subtitle: Text(m[indice].docente),
-            leading: CircleAvatar(child: Text(m[indice].idMateria), radius: 15,),
+            leading: CircleAvatar(child: Text(m[indice].idMateria), radius: 20,),
             trailing: IconButton(
               onPressed: (){
                 t.forEach((tarea) {

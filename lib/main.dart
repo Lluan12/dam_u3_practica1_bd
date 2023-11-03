@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       title: 'MATERIA-TAREA',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        appBarTheme: AppBarTheme(color: Colors.blue),
+        appBarTheme: AppBarTheme(color: Colors.lightBlueAccent),
         useMaterial3: true,
       ),
       home: App(),
