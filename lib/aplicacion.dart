@@ -19,7 +19,6 @@ class _AppState extends State<App> {
   Tarea estTarea = Tarea(idTarea: 0, idMateria: "", f_entrega: "", descripcion: "");
   bool mostrar = false;
   bool comprobar = false;
-  bool light = false;
 
   int index = 0;
   // Contoller para Materia
@@ -55,7 +54,7 @@ class _AppState extends State<App> {
     // TODO: implement initState
     actulizarMateria();
     actulizarTarea();
-    f_entrega = DateFormat('yyyy-MM-dd').format(selectedDate);
+    f_entrega = DateFormat('dd-MM-yyyy').format(selectedDate);
   }
 
   Widget build(BuildContext context) {
@@ -175,7 +174,7 @@ class _AppState extends State<App> {
                             if (pickedDate != null && pickedDate != selectedDate) {
                               selectedDate = pickedDate;
                               setState((){
-                                f_entrega = DateFormat('yyyy-MM-dd').format(selectedDate);
+                                f_entrega = DateFormat('dd-MM-yyyy').format(selectedDate);
                               });
                             }
                           });
@@ -194,7 +193,7 @@ class _AppState extends State<App> {
                                 idMateria2 = "";
                                 selectedDate = DateTime.now();
                                 descripcion.text = "";
-                                f_entrega = DateFormat('yyyy-MM-dd').format(selectedDate);
+                                f_entrega = DateFormat('dd-MM-yyyy').format(selectedDate);
                                 Navigator.pop(context);
                               },
                               child: Text("Cancelar")
@@ -210,7 +209,7 @@ class _AppState extends State<App> {
                                 BD.insertarTarea(tarea).then((value) {
                                   idMateria2 = "";
                                   selectedDate = DateTime.now();
-                                  f_entrega = DateFormat('yyyy-MM-dd').format(selectedDate);
+                                  f_entrega = DateFormat('dd-MM-yyyy').format(selectedDate);
                                   descripcion.text = "";
                                   actulizarTarea();
                                   Navigator.pop(context);
@@ -283,7 +282,7 @@ class _AppState extends State<App> {
                       if (pickedDate != null && pickedDate != selectedDate) {
                         selectedDate = pickedDate;
                         setState((){
-                          f_entrega = DateFormat('yyyy-MM-dd').format(selectedDate);
+                          f_entrega = DateFormat('dd-MM-yyyy').format(selectedDate);
                         });
                       }
                     });
@@ -303,7 +302,7 @@ class _AppState extends State<App> {
                         idMateria2 = "";
                         selectedDate = DateTime.now();
                         descripcion.text = "";
-                        f_entrega = DateFormat('yyyy-MM-dd').format(selectedDate);
+                        f_entrega = DateFormat('dd-MM-yyyy').format(selectedDate);
                         Navigator.pop(context);
                       },
                       child: Text("Cancelar",
@@ -320,7 +319,7 @@ class _AppState extends State<App> {
                         BD.actualizarTarea(estTarea).then((value) {
                           idMateria2 = "";
                           selectedDate = DateTime.now();
-                          f_entrega = DateFormat('yyyy-MM-dd').format(selectedDate);
+                          f_entrega = DateFormat('dd-MM-yyyy').format(selectedDate);
                           descripcion.text = "";
                           actulizarTarea();
                           estTarea = Tarea(idTarea: 0, idMateria: "", f_entrega: "", descripcion: "");
@@ -459,57 +458,104 @@ class _AppState extends State<App> {
           ));
         });
   }
-
+  
   Widget mostrarTareas(){
-    return ListView.builder(
-        itemCount: t.length,
-        itemBuilder: (context, indice){
-          return ListTile(
-            title: Text(t[indice].descripcion),
-            subtitle: Text(t[indice].f_entrega),
-            leading: CircleAvatar(child: Text(t[indice].idMateria), radius: 20,),
-            trailing: IconButton(
-              onPressed: (){
-                showDialog(
-                    context: context,
-                    builder: (builder){
-                      return AlertDialog(
-                        title: Text("Eliminar Tarea"),
-                        content: Text("¿Estas seguro de eliminar esta Tarea?"),
-                        actions: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton(onPressed: (){Navigator.pop(context);}, child: const Text("Cancelar")),
-                              TextButton(
-                                  onPressed: (){
-                                    BD.borrarTarea(t[indice].idTarea).then((value) {
-                                      actulizarTarea();
-                                      Navigator.pop(context);
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text("Tarea Eliminada")));
-                                    });
-                                  },
-                                  child: Text("Aceptar")
-                              )
-                            ],
-                          )
 
-                        ],
-                      );
-                    }
-                );
-              },
-              icon: Icon(Icons.delete),
+    String fechaActual = DateFormat('dd-MM-yyyy').format(DateTime.now());
+    List<Tarea> tareasHoy = [];
+    List<Tarea> otrasTareas = [];
+
+    for (var tarea in t) {
+      if (tarea.f_entrega == fechaActual) {
+        tareasHoy.add(tarea);
+      } else {
+        otrasTareas.add(tarea);
+      }
+    }
+
+    // Ordena las tareas de hoy por la fecha de entrega
+    tareasHoy.sort((a, b) => DateFormat("dd-MM-yyyy").parse(a.f_entrega).compareTo(DateFormat("dd-MM-yyyy").parse(b.f_entrega)));
+
+    // Ordena las otras tareas por la fecha de entrega
+    otrasTareas.sort((a, b) => DateFormat("dd-MM-yyyy").parse(a.f_entrega).compareTo(DateFormat("dd-MM-yyyy").parse(b.f_entrega)));
+
+    // Combina ambas listas para mostrar primero las tareas de hoy y luego las demás tareas
+    List<Tarea> todasLasTareas = [...tareasHoy, ...otrasTareas];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 16.0, left: 20.0),
+          child: Text(
+            "Hoy" ,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            onTap: (){
-              descripcion.text = t[indice].descripcion;
-              idMateria2 = t[indice].idMateria;
-              f_entrega = t[indice].f_entrega;
-              estTarea = t[indice];
-              updateTarea();
-            },
-          );
-        }
+          ),
+        ),
+
+        Expanded(
+          child: ListView.builder(
+              itemCount: todasLasTareas.length,
+              itemBuilder: (context, indice){
+                return Column(
+                  children: [
+                    // Agregar un Divider antes de las tareas que no son de hoy
+                    if (indice > 0 && todasLasTareas[indice - 1].f_entrega != todasLasTareas[indice].f_entrega)
+                      Divider(height: 0,),
+                    ListTile(
+                      title: Text(todasLasTareas[indice].descripcion),
+                      subtitle: Text(todasLasTareas[indice].f_entrega),
+                      leading: CircleAvatar(child: Text(todasLasTareas[indice].idMateria), radius: 20,),
+                      trailing: IconButton(
+                        onPressed: (){
+                          showDialog(
+                              context: context,
+                              builder: (builder){
+                                return AlertDialog(
+                                  title: Text("Eliminar Tarea"),
+                                  content: Text("¿Estas seguro de eliminar esta Tarea?"),
+                                  actions: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        TextButton(onPressed: (){Navigator.pop(context);}, child: const Text("Cancelar")),
+                                        TextButton(
+                                            onPressed: (){
+                                              BD.borrarTarea(todasLasTareas[indice].idTarea).then((value) {
+                                                actulizarTarea();
+                                                Navigator.pop(context);
+                                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text("Tarea Eliminada")));
+                                              });
+                                            },
+                                            child: Text("Aceptar")
+                                        )
+                                      ],
+                                    )
+
+                                  ],
+                                );
+                              }
+                          );
+                        },
+                        icon: Icon(Icons.delete),
+                      ),
+                      onTap: (){
+                        descripcion.text = todasLasTareas[indice].descripcion;
+                        idMateria2 = todasLasTareas[indice].idMateria;
+                        f_entrega = todasLasTareas[indice].f_entrega;
+                        estTarea = todasLasTareas[indice];
+                        updateTarea();
+                      },
+                    ),
+                  ],
+                );
+              }
+          ),
+        ),
+      ],
     );
   }
 
